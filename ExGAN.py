@@ -24,7 +24,7 @@ class NWSDataset(Dataset):
     """
 
     def __init__(
-        self, fake='ENHDecrLambdLin/fake10.pt', val=128
+        self, fake='fake.pt', val=128
     ):
         self.real = torch.load('data/real.pt').cuda()
         self.fake = torch.load(fake).cuda()
@@ -124,8 +124,8 @@ G = Generator(in_channels=latentdim, out_channels=1).cuda()
 D = Discriminator(in_channels=1).cuda()
 G.apply(weights_init_normal)
 D.apply(weights_init_normal)
-genpareto_params = (-0.07241964091641762, 0.0007877211367414993, 0.25543821779344433)
-threshold = 0.08699417
+genpareto_params = (-0.09095992649837537, 0.0052528357032590265, 0.26882173805170484)
+threshold = 0.0428257
 rv = genpareto(*genpareto_params)
 
 def sample_genpareto(size):
