@@ -44,14 +44,7 @@ class Generator(nn.Module):
         return torch.tanh(self.block5(out))
 
 latentdim = 20
-criterionSource = nn.BCELoss()
-criterionContinuous = nn.L1Loss()
-criterionValG = nn.L1Loss()
-criterionValD = nn.L1Loss()
-G = Generator(in_channels=latentdim, out_channels=1).cuda(2)
-D = Discriminator(in_channels=1).cuda(2)
-G.apply(weights_init_normal)
-D.apply(weights_init_normal)
+G = Generator(in_channels=latentdim, out_channels=1).cuda()
 genpareto_params = (-0.09095992649837537, 0.0052528357032590265, 0.26882173805170484)
 threshold = 0.0428257
 rv = genpareto(*genpareto_params)

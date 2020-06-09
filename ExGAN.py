@@ -4,14 +4,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import itertools
 from torch.utils.data import Dataset, DataLoader
-from torchvision.transforms import Compose, ToTensor
 from skimage.transform import resize
-from torchvision import transforms
 import torch.optim as optim
 from torch import LongTensor, FloatTensor
 from scipy.stats import skewnorm, genpareto
@@ -24,7 +20,7 @@ class NWSDataset(Dataset):
     """
 
     def __init__(
-        self, fake='fake.pt', val=128
+        self, fake='fake.pt', val=144
     ):
         self.real = torch.load('data/real.pt').cuda()
         self.fake = torch.load(fake).cuda()
@@ -35,7 +31,7 @@ class NWSDataset(Dataset):
 
     def __getitem__(self, item):
         img = self.realdata[item]
-        return img, 20*(img.sum().view(-1, 1)/4096)+19
+        return img, 20*(img.sum()/4096)+19
 
 
 def weights_init_normal(m):
@@ -117,9 +113,6 @@ class Discriminator(nn.Module):
 
 latentdim = 20
 criterionSource = nn.BCELoss()
-criterionContinuous = nn.L1Loss()
-criterionValG = nn.L1Loss()
-criterionValD = nn.L1Loss()
 G = Generator(in_channels=latentdim, out_channels=1).cuda()
 D = Discriminator(in_channels=1).cuda()
 G.apply(weights_init_normal)
@@ -137,9 +130,9 @@ def sample_cont_code(batch_size):
 optimizerG = optim.Adam(G.parameters(), lr=0.0002, betas=(0.5, 0.999))
 optimizerD = optim.Adam(D.parameters(), lr=0.0001, betas=(0.5, 0.999))
 static_code = sample_cont_code(81)
-static_z = Variable(FloatTensor(torch.randn((81, latentdim, 1, 1)))).cuda()
 
 def sample_image(batches_done):
+    static_z = Variable(FloatTensor(torch.randn((81, latentdim, 1, 1)))).cuda()
     static_sample = G(static_z, static_code).detach().cpu()
     static_sample = (static_sample + 1) / 2.0
     save_image(static_sample, DIRNAME + "%d.png" % batches_done, nrow=9)
@@ -176,7 +169,7 @@ for epoch in range(0, 1000):
         )
         trueTensor = trueTensor.view(-1, 1).cuda()
         falseTensor = falseTensor.view(-1, 1).cuda()
-        images, labels = images.cuda(), labels.cuda()
+        images, labels = images.cuda(), labels.view(-1, 1).cuda()
         realSource = D(images, labels)
         realLoss = criterionSource(realSource, trueTensor.expand_as(realSource))
         latent = Variable(torch.randn(batch_size, latentdim, 1, 1)).cuda()
@@ -203,8 +196,8 @@ for epoch in range(0, 1000):
         board.add_scalar('lossD', lossD.item(), step)
         board.add_scalar('lossG', lossG.item(), step)
     if (epoch + 1) % 50 == 0:
-        torch.save(G.state_dict(), DIRNAME + 'Gepoch' + str(epoch) + ".pt")
-        torch.save(D.state_dict(), DIRNAME + 'Depoch' + str(epoch) + ".pt")
+        torch.save(G.state_dict(), DIRNAME + 'G' + str(epoch) + ".pt")
+        torch.save(D.state_dict(), DIRNAME + 'D' + str(epoch) + ".pt")
     if (epoch + 1) % 10 == 0:   
         with torch.no_grad():
             G.eval()

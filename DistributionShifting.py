@@ -1,20 +1,18 @@
 from tensorboardX import SummaryWriter
-import os
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.autograd import Variable
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import itertools
+from datetime import datetime, timedelta
+import os
 from torch.utils.data import Dataset, DataLoader
-from torchvision.transforms import Compose, ToTensor
 from skimage.transform import resize
-from torchvision import transforms
+import torch
+import torch.nn as nn
 import torch.optim as optim
+import torch.utils.data
+import torch.nn.functional as F
+import torchvision.utils as vutils
+from torch.autograd import Variable
 from torch import LongTensor, FloatTensor
-from scipy.stats import skewnorm, genpareto
 from torchvision.utils import save_image
 import sys
 
@@ -24,25 +22,19 @@ class NWSDataset(Dataset):
     """
 
     def __init__(
-        self, fake='data/fake.pt', fac=1, dsize=2557
+        self, fake='data/fake.pt', c=0.75, i=1, n=2557
     ):
-        val = int(dsize * fac)
+        val = int(n*(c**i))
         self.real = torch.load('data/real.pt').cuda()
         self.fake = torch.load(fake).cuda()
-        fakelen = self.fake.shape[0]
-        realidx = [np.random.randint(0, fakelen - val) for i in range(val)]
-        self.realdata = torch.cat([self.real[:-1*val], self.fake[realidx]], 0)
-        self.fakedata = torch.cat([self.real[-1*val:], self.fake[-1*val:]], 0)
+        self.realdata = torch.cat([self.real[:val], self.fake[:-1*val]], 0)
         self.realdata.requires_grad = False
-        self.fakedata.requires_grad = False
-        self.fake_idxs = [np.random.randint(0, self.fakedata.shape[0]-1) for i in range(self.realdata.shape[0])]
         
     def __len__(self):
         return self.realdata.shape[0]
 
     def __getitem__(self, item):
-        fakeitem = self.fake_idxs[item]
-        return self.realdata[item], self.fakedata[fakeitem]
+        return self.realdata[item]
 
 
 def weights_init_normal(m):
@@ -108,8 +100,8 @@ class Discriminator(nn.Module):
         self.block5 = nn.Conv2d(512, 64, 4, 1, 0)
         self.source = nn.Linear(64, 1)
 
-    def forward(self, inp):
-        out = self.block1(inp)
+    def forward(self, input):
+        out = self.block1(input)
         out = self.block2(out)
         out = self.block3(out)
         out = self.block4(out)
@@ -128,7 +120,6 @@ D.apply(weights_init_normal)
 
 optimizerG = optim.Adam(G.parameters(), lr=0.00002, betas=(0.5, 0.999))
 optimizerD = optim.Adam(D.parameters(), lr=0.00001, betas=(0.5, 0.999))
-
 static_z = Variable(FloatTensor(torch.randn((81, latentdim, 1, 1)))).cuda()
 
 def sample_image(stage, epoch):
@@ -146,11 +137,12 @@ step = 0
 fake_name = 'data/fake.pt'
 c = 0.75
 k = 10
-for i, val in enumerate([c**t for t in range(1, 11)]):
-    dataloader = DataLoader(NWSDataset(fake=fake_name, fac=val), batch_size=256, shuffle=True)
+n = 2557
+for i in range(1, k+1):
+    dataloader = DataLoader(NWSDataset(fake=fake_name, c=c, i=i, n=n), batch_size=256, shuffle=True)
     for epoch in range(0, 100):
         print(epoch)
-        for realdata, fakedata in dataloader:
+        for realdata in dataloader:
             noise = 1e-5*max(1 - (epoch/100.0), 0)
             step += 1
             batch_size = realdata[0].shape[0]
@@ -164,7 +156,7 @@ for i, val in enumerate([c**t for t in range(1, 11)]):
             )
             trueTensor = trueTensor.view(-1, 1).cuda()
             falseTensor = falseTensor.view(-1, 1).cuda()
-            realdata, fakedata = realdata.cuda(), fakedata.cuda()
+            realdata = realdata.cuda()
             realSource = D(realdata)
             realLoss = criterionSource(realSource, trueTensor.expand_as(realSource))
             latent = Variable(torch.randn(batch_size, latentdim, 1, 1)).cuda()
@@ -181,7 +173,7 @@ for i, val in enumerate([c**t for t in range(1, 11)]):
             optimizerG.zero_grad()
             lossG.backward()
             torch.nn.utils.clip_grad_norm_(G.parameters(),20)
-            optimizerG.step()
+            optimizerG.step() 
             board.add_scalar('realLoss', realLoss.item(), step)
             board.add_scalar('fakeGenLoss', fakeGenLoss.item(), step)
             board.add_scalar('lossD', lossD.item(), step)
@@ -196,7 +188,9 @@ for i, val in enumerate([c**t for t in range(1, 11)]):
                 G.train()
     with torch.no_grad():
         G.eval()
-        fakeSamples = G(Variable(torch.randn(2557, latentdim, 1, 1)).cuda())
+        fsize = int((1-(c**(i+1)))*n/c)
+        print(fsize)
+        fakeSamples = G(Variable(torch.randn(fsize, latentdim, 1, 1)).cuda())
         sums = fakeSamples.sum(dim = (1, 2, 3)).detach().cpu().numpy().argsort()[::-1].copy()
         fake_name = DIRNAME+'fake'+str(i+1)+'.pt'
         torch.save(fakeSamples.data[sums], fake_name)

@@ -4,14 +4,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import itertools
 from torch.utils.data import Dataset, DataLoader
-from torchvision.transforms import Compose, ToTensor
 from skimage.transform import resize
-from torchvision import transforms
 import torch.optim as optim
 from torch import LongTensor, FloatTensor
 from scipy.stats import skewnorm, genpareto
