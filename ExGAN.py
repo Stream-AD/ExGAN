@@ -137,9 +137,9 @@ def sample_cont_code(batch_size):
 optimizerG = optim.Adam(G.parameters(), lr=0.0002, betas=(0.5, 0.999))
 optimizerD = optim.Adam(D.parameters(), lr=0.0001, betas=(0.5, 0.999))
 static_code = sample_cont_code(81)
+static_z = Variable(FloatTensor(torch.randn((81, latentdim, 1, 1)))).cuda()
 
 def sample_image(batches_done):
-    static_z = Variable(FloatTensor(torch.randn((81, latentdim, 1, 1)))).cuda()
     static_sample = G(static_z, static_code).detach().cpu()
     static_sample = (static_sample + 1) / 2.0
     save_image(static_sample, DIRNAME + "%d.png" % batches_done, nrow=9)

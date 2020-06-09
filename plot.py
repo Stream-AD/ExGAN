@@ -1,9 +1,6 @@
 from mpl_toolkits.basemap import Basemap, cm
 import numpy as np
 import matplotlib.pyplot as plt
-import torch
-import os
-from skimage.transform import resize
 
 latcorners = np.array([23.476929, 20.741224, 45.43908 , 51.61555 ])
 loncorners = np.array([-118.67131042480469, -82.3469009399414,
@@ -12,6 +9,9 @@ lon_0 = -105
 lat_0 = 60
 
 def plot_precip(data):
+	'''
+	data is a 813*1051 matrix containing unnormalized precipitation values
+	'''
 	fig = plt.figure(figsize=(8,8))
 	ax = fig.add_axes([0.1,0.1,0.8,0.8])
 	m = Basemap(projection='stere',lon_0=lon_0,lat_0=90.,lat_ts=lat_0,\

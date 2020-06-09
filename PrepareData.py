@@ -13,7 +13,7 @@ import torchvision.utils as vutils
 from torch.autograd import Variable
 from torch import LongTensor, FloatTensor
 
-curdt = datetime(2010,1,1)
+curdt = datetime(2010,1,1) #Start data collection from this date
 
 os.makedirs('data', exist_ok=True)
 ### Alternate URL for downloading data (not currently in use)

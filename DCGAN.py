@@ -125,9 +125,9 @@ D.apply(weights_init_normal)
 
 optimizerG = optim.Adam(G.parameters(), lr=0.0002, betas=(0.5, 0.999))
 optimizerD = optim.Adam(D.parameters(), lr=0.0001, betas=(0.5, 0.999))
+static_z = Variable(FloatTensor(torch.randn((81, latentdim, 1, 1)))).cuda()
 
 def sample_image(batches_done):
-    static_z = Variable(FloatTensor(torch.randn((81, latentdim, 1, 1)))).cuda()
     static_sample = G(static_z).detach().cpu()
     static_sample = (static_sample + 1) / 2.0
     save_image(static_sample, DIRNAME + "%d.png" % batches_done, nrow=9)
@@ -138,7 +138,7 @@ os.makedirs(DIRNAME, exist_ok=True)
 board = SummaryWriter(log_dir=DIRNAME)
 
 step = 0
-for epoch in range(0, 1000):
+for epoch in range(1000):
     print(epoch)
     for images in dataloader:
         noise = 1e-5*max(1 - (epoch/500.0), 0)
