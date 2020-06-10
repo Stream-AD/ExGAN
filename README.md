@@ -28,6 +28,15 @@ python ExGAN.py
 
 ### Evaluation and Visualizing the Results
 
+Generate samples from DCGAN of different extremeness probabilties, and mark the time taken in sampling.
+```
+python DCGAN Sampling.py
+```
+Similarly, Generate samples from ExGAN of different extremeness probabilties, and mark the time taken in sampling.
+```
+python ExGAN Sampling.py
+```
+
 We provide FID.py to calculate the FID score, as described in the paper, on the trained models. 
 
 The python file, Plot.py, contains the code for plotting rainfall maps like the ones included in the paper. 
