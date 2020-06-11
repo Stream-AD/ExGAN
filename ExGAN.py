@@ -20,7 +20,7 @@ class NWSDataset(Dataset):
     """
 
     def __init__(
-        self, fake='fake.pt', val=144
+        self, fake='DistShift/fake10.pt', val=144
     ):
         self.real = torch.load('data/real.pt').cuda()
         self.fake = torch.load(fake).cuda()

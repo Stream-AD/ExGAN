@@ -138,7 +138,7 @@ fake_name = 'data/fake.pt'
 c = 0.75
 k = 10
 n = 2557
-for i in range(1, k+1):
+for i in range(1, k):
     dataloader = DataLoader(NWSDataset(fake=fake_name, c=c, i=i, n=n), batch_size=256, shuffle=True)
     for epoch in range(0, 100):
         print(epoch)
@@ -189,7 +189,6 @@ for i in range(1, k+1):
     with torch.no_grad():
         G.eval()
         fsize = int((1-(c**(i+1)))*n/c)
-        print(fsize)
         fakeSamples = G(Variable(torch.randn(fsize, latentdim, 1, 1)).cuda())
         sums = fakeSamples.sum(dim = (1, 2, 3)).detach().cpu().numpy().argsort()[::-1].copy()
         fake_name = DIRNAME+'fake'+str(i+1)+'.pt'

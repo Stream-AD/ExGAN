@@ -182,5 +182,6 @@ for epoch in range(1000):
             sample_image(epoch)
             G.train()
 G.eval()
-samples = G(Variable(torch.randn(2557, latentdim, 1, 1)).cuda())
-torch.save(samples, 'data/fake.pt')
+fakeSamples = G(Variable(torch.randn(int(2557/0.75), latentdim, 1, 1)).cuda())
+sums = fakeSamples.sum(dim = (1, 2, 3)).detach().cpu().numpy().argsort()[::-1].copy()
+torch.save(fakeSamples[sums], 'data/fake.pt')
