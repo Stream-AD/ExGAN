@@ -49,7 +49,7 @@ genpareto_params = (-0.09095992649837537, 0.0052528357032590265, 0.2688217380517
 threshold = 0.0428257
 rv = genpareto(*genpareto_params)
 
-G.load_state_dict(torch.load('DCGAN.pt'))
+G.load_state_dict(torch.load('DCGAN/G999.pt'))
 G.eval()
 
 c = 0.75

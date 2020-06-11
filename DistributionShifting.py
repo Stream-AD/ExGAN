@@ -127,12 +127,12 @@ def sample_image(stage, epoch):
     static_sample = (static_sample + 1) / 2.0
     save_image(static_sample, DIRNAME + "stage%depoch%d.png" % (stage, epoch), nrow=9)
 
-DIRNAME = sys.argv[1] + '/'
+DIRNAME = 'DistShift/'
 os.makedirs(DIRNAME, exist_ok=True)
 board = SummaryWriter(log_dir=DIRNAME)
 
-G.load_state_dict(torch.load('Generator.pt'))
-D.load_state_dict(torch.load('Discriminator.pt'))
+G.load_state_dict(torch.load('DCGAN/G999.pt'))
+D.load_state_dict(torch.load('DCGAN/D999.pt'))
 step = 0
 fake_name = 'data/fake.pt'
 c = 0.75

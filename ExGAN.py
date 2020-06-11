@@ -148,7 +148,7 @@ def sample_image(batches_done):
     print(diffs.mean(), diffs.max(), diffs.min(), diffs.std())
     save_image(0.5*(sample1+1), DIRNAME + "c1-%d.png" % batches_done, nrow=9)
 
-DIRNAME = sys.argv[1] + '/'
+DIRNAME = 'ExGAN/'
 os.makedirs(DIRNAME, exist_ok=True)
 board = SummaryWriter(log_dir=DIRNAME)
 step = 0

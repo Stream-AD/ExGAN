@@ -55,7 +55,7 @@ def sample_genpareto(size):
 def sample_cont_code(batch_size):
     return Variable(sample_genpareto((batch_size, 1, 1, 1))).cuda(2)
 
-G.load_state_dict(torch.load('ExGAN.pt'))
+G.load_state_dict(torch.load('ExGAN/G999.pt'))
 G.eval()
 
 c = 0.75

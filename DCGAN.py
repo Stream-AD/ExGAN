@@ -128,7 +128,7 @@ def sample_image(batches_done):
     static_sample = (static_sample + 1) / 2.0
     save_image(static_sample, DIRNAME + "%d.png" % batches_done, nrow=9)
 
-DIRNAME = sys.argv[1] + '/'
+DIRNAME = 'DCGAN/'
 os.makedirs(DIRNAME, exist_ok=True)
 
 board = SummaryWriter(log_dir=DIRNAME)
@@ -181,3 +181,6 @@ for epoch in range(1000):
             G.eval()
             sample_image(epoch)
             G.train()
+G.eval()
+samples = G(Variable(torch.randn(2557, latentdim, 1, 1)).cuda())
+torch.save(samples, 'data/fake.pt')
