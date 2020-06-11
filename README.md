@@ -26,6 +26,8 @@ Finally, we can train ExGAN on the distribution shifted dataset.
 python ExGAN.py
 ```
 
+The training of ExGAN and DCGAN can be monitored using TensorBoard. 
+
 ### Evaluation and Visualizing the Results
 
 Generate samples from DCGAN of different extremeness probabilties, and mark the time taken in sampling.
