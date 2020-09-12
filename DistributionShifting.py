@@ -16,20 +16,23 @@ from torch import LongTensor, FloatTensor
 from torchvision.utils import save_image
 import sys
 
+gpu_id = 0
+
+
 class NWSDataset(Dataset):
     """
     NWS Dataset
     """
 
     def __init__(
-        self, fake='data/fake.pt', c=0.75, i=1, n=2557
+            self, fake='data/fake.pt', c=0.75, i=1, n=2557
     ):
-        val = int(n*(c**i))
-        self.real = torch.load('data/real.pt').cuda()
-        self.fake = torch.load(fake).cuda()
-        self.realdata = torch.cat([self.real[:val], self.fake[:-1*val]], 0)
+        val = int(n * (c ** i))
+        self.real = torch.load('data/real.pt').cuda(gpu_id)
+        self.fake = torch.load(fake).cuda(gpu_id)
+        self.realdata = torch.cat([self.real[:val], self.fake[:-1 * val]], 0)
         self.realdata.requires_grad = False
-        
+
     def __len__(self):
         return self.realdata.shape[0]
 
@@ -41,6 +44,7 @@ def weights_init_normal(m):
     classname = m.__class__.__name__
     if classname.find("Conv") != -1:
         torch.nn.init.normal_(m.weight.data, 0.0, 0.02)
+
 
 def convTBNReLU(in_channels, out_channels, kernel_size=4, stride=2, padding=1):
     return nn.Sequential(
@@ -110,40 +114,43 @@ class Discriminator(nn.Module):
         out = out.view(size, -1)
         source = torch.sigmoid(self.source(out))
         return source
-    
+
+
 latentdim = 20
 criterionSource = nn.BCELoss()
-G = Generator(in_channels=latentdim, out_channels=1).cuda()
-D = Discriminator(in_channels=1).cuda()
+G = Generator(in_channels=latentdim, out_channels=1).cuda(gpu_id)
+D = Discriminator(in_channels=1).cuda(gpu_id)
 G.apply(weights_init_normal)
 D.apply(weights_init_normal)
 
 optimizerG = optim.Adam(G.parameters(), lr=0.00002, betas=(0.5, 0.999))
 optimizerD = optim.Adam(D.parameters(), lr=0.00001, betas=(0.5, 0.999))
-static_z = Variable(FloatTensor(torch.randn((81, latentdim, 1, 1)))).cuda()
+static_z = Variable(FloatTensor(torch.randn((81, latentdim, 1, 1)))).cuda(gpu_id)
+
 
 def sample_image(stage, epoch):
     static_sample = G(static_z).detach().cpu()
     static_sample = (static_sample + 1) / 2.0
     save_image(static_sample, DIRNAME + "stage%depoch%d.png" % (stage, epoch), nrow=9)
 
-DIRNAME = 'DistShift/'
+
+c = 0.75
+k = 10
+DIRNAME = 'DistShift'
 os.makedirs(DIRNAME, exist_ok=True)
 board = SummaryWriter(log_dir=DIRNAME)
 
 G.load_state_dict(torch.load('DCGAN/G999.pt'))
 D.load_state_dict(torch.load('DCGAN/D999.pt'))
 step = 0
-fake_name = 'data/fake.pt'
-c = 0.75
-k = 10
+fake_name = 'fake' + str(c) + '.pt'
 n = 2557
 for i in range(1, k):
     dataloader = DataLoader(NWSDataset(fake=fake_name, c=c, i=i, n=n), batch_size=256, shuffle=True)
     for epoch in range(0, 100):
         print(epoch)
         for realdata in dataloader:
-            noise = 1e-5*max(1 - (epoch/100.0), 0)
+            noise = 1e-5 * max(1 - (epoch / 100.0), 0)
             step += 1
             batch_size = realdata[0].shape[0]
             trueTensor = 0.7 + 0.5 * torch.rand(batch_size)
@@ -154,44 +161,44 @@ for i in range(1, k):
                 probFlip * falseTensor + (1 - probFlip) * trueTensor,
                 probFlip * trueTensor + (1 - probFlip) * falseTensor,
             )
-            trueTensor = trueTensor.view(-1, 1).cuda()
-            falseTensor = falseTensor.view(-1, 1).cuda()
-            realdata = realdata.cuda()
+            trueTensor = trueTensor.view(-1, 1).cuda(gpu_id)
+            falseTensor = falseTensor.view(-1, 1).cuda(gpu_id)
+            realdata = realdata.cuda(gpu_id)
             realSource = D(realdata)
             realLoss = criterionSource(realSource, trueTensor.expand_as(realSource))
-            latent = Variable(torch.randn(batch_size, latentdim, 1, 1)).cuda()
+            latent = Variable(torch.randn(batch_size, latentdim, 1, 1)).cuda(gpu_id)
             fakeGen = G(latent)
             fakeGenSource = D(fakeGen.detach())
             fakeGenLoss = criterionSource(fakeGenSource, falseTensor.expand_as(fakeGenSource))
             lossD = realLoss + fakeGenLoss
             optimizerD.zero_grad()
             lossD.backward()
-            torch.nn.utils.clip_grad_norm_(D.parameters(),20)
+            torch.nn.utils.clip_grad_norm_(D.parameters(), 20)
             optimizerD.step()
             fakeGenSource = D(fakeGen)
             lossG = criterionSource(fakeGenSource, trueTensor.expand_as(fakeGenSource))
             optimizerG.zero_grad()
             lossG.backward()
-            torch.nn.utils.clip_grad_norm_(G.parameters(),20)
-            optimizerG.step() 
+            torch.nn.utils.clip_grad_norm_(G.parameters(), 20)
+            optimizerG.step()
             board.add_scalar('realLoss', realLoss.item(), step)
             board.add_scalar('fakeGenLoss', fakeGenLoss.item(), step)
             board.add_scalar('lossD', lossD.item(), step)
             board.add_scalar('lossG', lossG.item(), step)
         if (epoch + 1) % 50 == 0:
-            torch.save(G.state_dict(), DIRNAME + "Gstage"+str(i) + 'epoch' + str(epoch) + ".pt")
-            torch.save(D.state_dict(), DIRNAME + "Dstage"+str(i) + 'epoch' + str(epoch) + ".pt")
-        if (epoch + 1) % 10 == 0:   
+            torch.save(G.state_dict(), DIRNAME + "Gstage" + str(i) + 'epoch' + str(epoch) + ".pt")
+            torch.save(D.state_dict(), DIRNAME + "Dstage" + str(i) + 'epoch' + str(epoch) + ".pt")
+        if (epoch + 1) % 10 == 0:
             with torch.no_grad():
                 G.eval()
                 sample_image(i, epoch)
                 G.train()
     with torch.no_grad():
         G.eval()
-        fsize = int((1-(c**(i+1)))*n/c)
-        fakeSamples = G(Variable(torch.randn(fsize, latentdim, 1, 1)).cuda())
-        sums = fakeSamples.sum(dim = (1, 2, 3)).detach().cpu().numpy().argsort()[::-1].copy()
-        fake_name = DIRNAME+'fake'+str(i+1)+'.pt'
+        fsize = int((1 - (c ** (i + 1))) * n / c)
+        fakeSamples = G(Variable(torch.randn(fsize, latentdim, 1, 1)).cuda(gpu_id))
+        sums = fakeSamples.sum(dim=(1, 2, 3)).detach().cpu().numpy().argsort()[::-1].copy()
+        fake_name = DIRNAME + 'fake' + str(i + 1) + '.pt'
         torch.save(fakeSamples.data[sums], fake_name)
         del fakeSamples
         G.train()

@@ -51,22 +51,17 @@ rv = genpareto(*genpareto_params)
 
 G.load_state_dict(torch.load('DCGAN/G999.pt'))
 G.eval()
-
-c = 0.75
-k = 10
-for tau in [0.05, 0.01]:
-    tau_prime = tau / (c**k)
-    val = rv.ppf(1-tau_prime) + threshold
-    images = []
-    count = 0
-    t = time.time()
-    while count<100:
-        latent = Variable(FloatTensor(torch.randn((100, latentdim, 1, 1)))).cuda()
-        image = G(latent)
-        sums = image.sum(dim=(1, 2, 3))/4096 >= val
-        if sums.nonzero().shape[0] > 0:
-            images.append(image[sums])
-            count += sums.nonzero().shape[0]
-    print(time.time() - t)
-    images = torch.cat(images, 0)[:100]
-    torch.save(images, 'DCGAN'+str(tau)+'.pt')
+num = 57
+G.requires_grad = False
+real = torch.load('data/test.pt').cuda()[:num]
+z = torch.zeros((num, latentdim, 1, 1)).cuda()
+z.requires_grad = True
+optimizer = torch.optim.Adam([z], lr=1e-2)
+criterion = nn.MSELoss()
+for i in range(2000):
+    pred = G(z)
+    loss = criterion(pred, real)
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    print(loss)

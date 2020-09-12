@@ -45,15 +45,9 @@ class Generator(nn.Module):
 
 latentdim = 20
 G = Generator(in_channels=latentdim, out_channels=1).cuda()
-genpareto_params = (-0.09095992649837537, 0.0052528357032590265, 0.26882173805170484)
-threshold = 0.0428257
+genpareto_params = (1.33, 0, 0.0075761900937239765)
+threshold = -0.946046018600464
 rv = genpareto(*genpareto_params)
-
-def sample_genpareto(size):
-    return FloatTensor(rv.ppf(FloatTensor(*size).uniform_(0, 1))) + threshold
-
-def sample_cont_code(batch_size):
-    return Variable(sample_genpareto((batch_size, 1, 1, 1))).cuda(2)
 
 G.load_state_dict(torch.load('ExGAN/G999.pt'))
 G.eval()

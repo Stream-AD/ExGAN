@@ -45,8 +45,10 @@ python ExGANSampling.py
 ```
 
 We provide FID.py to calculate the FID score, as described in the paper, on the trained models. 
+We also provide DCGANRecLoss.py, and ExGANRecLoss.py to evaluate DCGAN and ExGAN on their Reconstruction Loss
+Note that, both of these metrics are calculated on a test set. PrepareData.py can be used to curate the test set for the duration described in the paper.
 
-The python file, Plot.py, contains the code for plotting rainfall maps like the figures included in the paper. Note that this requires the Basemap library from matplotlib. 
+The python file, plot.py, contains the code for plotting rainfall maps like the figures included in the paper. Note that this requires the Basemap library from matplotlib. 
 
 We also provide an IPython notebook, EVT_Analysis.ipynb to play with and visualize the effect of different thresholds for the Peaks over 
 Threshold approach.

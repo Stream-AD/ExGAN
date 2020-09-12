@@ -10,15 +10,15 @@ from scipy import linalg
 import warnings
 
 
-data = torch.load('data/real.pt')
-numSamples = 144
-EPOCHS = 100
+data = torch.load('data/test.pt')
+numSamples = 57
+EPOCHS = 50
 loss_func = nn.L1Loss()
 
 class AutoEncoder(nn.Module):
     def __init__(self):
         super(AutoEncoder, self).__init__()
-        self.encoder = nn.Sequential(nn.Linear(4096,128), nn.ReLU(True))
+        self.encoder = nn.Sequential(nn.Linear(4096,128), nn.ReLU(True), nn.Dropout())
         self.decoder = nn.Sequential(nn.Linear(128,4096))
         
     def forward(self,x):
@@ -41,6 +41,7 @@ for epoch in range(EPOCHS):
     optimizer.step()
 plt.plot(losses)
 
+ae.eval()
 
 def FID(mu1, mu2, sigma1, sigma2): 
     eps=1e-30
