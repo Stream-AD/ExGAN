@@ -14,7 +14,7 @@ from torch.autograd import Variable
 from torch import LongTensor, FloatTensor
 
 curdt = datetime(2010,1,1) #Start data collection from this date
-
+dt = datetime(2010,1,1)
 os.makedirs('data', exist_ok=True)
 ### Alternate URL for downloading data (not currently in use)
 # url = 'http://water.weather.gov/precip/downloads/{dt:%Y/%m/%d}/nws_precip_1day_'\
@@ -25,7 +25,7 @@ for i in range(2557):
     try:
         url = 'http://water.weather.gov/precip/archive/{dt:%Y/%m/%d}/nws_precip_conus_{dt:%Y%m%d}.nc'.format(dt=curdt)
         urlretrieve(url, 'data/nws_precip_conus_{dt:%Y%m%d}.nc'.format(dt=curdt))
-        curdt = curdt + timedelta(days=i)
+        curdt = dt + timedelta(days=i)
     except:
         pass
 
