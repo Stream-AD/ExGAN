@@ -29,9 +29,10 @@ class NWSDataset(Dataset):
     ):
         val = int(n * (c ** i))
         self.real = torch.load('data/real.pt').cuda(gpu_id)
+        self.real.requires_grad = False
         self.fake = torch.load(fake).cuda(gpu_id)
+        self.fake.requires_grad = False
         self.realdata = torch.cat([self.real[:val], self.fake[:-1 * val]], 0)
-        self.realdata.requires_grad = False
 
     def __len__(self):
         return self.realdata.shape[0]
@@ -136,14 +137,14 @@ def sample_image(stage, epoch):
 
 c = 0.75
 k = 10
-DIRNAME = 'DistShift'
+DIRNAME = 'DistShift/'
 os.makedirs(DIRNAME, exist_ok=True)
 board = SummaryWriter(log_dir=DIRNAME)
 
 G.load_state_dict(torch.load('DCGAN/G999.pt'))
 D.load_state_dict(torch.load('DCGAN/D999.pt'))
 step = 0
-fake_name = 'fake' + str(c) + '.pt'
+fake_name = 'data/fake.pt'
 n = 2557
 for i in range(1, k):
     dataloader = DataLoader(NWSDataset(fake=fake_name, c=c, i=i, n=n), batch_size=256, shuffle=True)
