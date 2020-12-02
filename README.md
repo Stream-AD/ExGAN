@@ -9,7 +9,7 @@
 
 Implementation of
 
-- [ExGAN: Adversarial Generation of Extreme Samples](https://arxiv.org/pdf/2009.08454.pdf). *Siddharth Bhatia⁺, Arjit Jain⁺, Bryan Hooi.* (⁺ denotes equal contribution)
+- [ExGAN: Adversarial Generation of Extreme Samples](https://arxiv.org/pdf/2009.08454.pdf). *Siddharth Bhatia⁺, Arjit Jain⁺, Bryan Hooi.* (⁺ denotes equal contribution). AAAI 2021.
 
 ![](https://www.comp.nus.edu.sg/~sbhatia/assets/img/exgan.png)
 Our goal is to generate samples which are both realistic and extreme, based on any user-specified extremeness criteria
