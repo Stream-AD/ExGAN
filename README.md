@@ -5,7 +5,11 @@
   <a href="https://github.com/Stream-AD/ExGAN/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
   </a>
+  <a href="https://colab.research.google.com/github/ArjitJ/ExGAN/blob/master/ExGAN-Colab.ipynb">
+    <img src="https://colab.research.google.com/assets/colab-badge.svg">
+  </a>
 </p>
+
 
 Implementation of
 
