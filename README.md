@@ -7,10 +7,10 @@
     <a href="https://arxiv.org/pdf/2009.08454.pdf">
       <img src="http://img.shields.io/badge/Paper-PDF-brightgreen.svg">
   </a>
-   <a href="https://www.comp.nus.edu.sg/~sbhatia/assets/pdf/ExGANposter.pdf">
+   <a href="https://www.comp.nus.edu.sg/~sbhatia/assets/pdf/ExGAN_poster.pdf">
       <img src="http://img.shields.io/badge/Poster-PDF-green.svg">
   </a>
-  <a href="https://www.comp.nus.edu.sg/~sbhatia/assets/pdf/ExGANslides.pdf">
+  <a href="https://www.comp.nus.edu.sg/~sbhatia/assets/pdf/ExGAN_slides.pdf">
       <img src="http://img.shields.io/badge/Slides-PDF-ff9e18.svg">
   </a>
   <a href="https://youtu.be/7s7RkCeeoeg">
@@ -94,13 +94,10 @@ Threshold approach.
 If you use this code for your research, please consider citing our arXiv preprint
 
 ```bibtex
-@misc{bhatia2020exgan,
+@inproceedings{bhatia2021exgan,
     title={ExGAN: Adversarial Generation of Extreme Samples},
     author={Siddharth Bhatia and Arjit Jain and Bryan Hooi},
-    year={2020},
-    eprint={2009.08454},
-    archivePrefix={arXiv},
-    primaryClass={cs.LG}
+    booktitle={AAAI Conference on Artificial Intelligence (AAAI)},
+    year={2021}
 }
-
 ```
