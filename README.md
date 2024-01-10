@@ -91,7 +91,7 @@ Threshold approach.
 
 ## Citation
 
-If you use this code for your research, please consider citing our arXiv preprint
+If you use this code for your research, please consider citing our AAAI paper.
 
 ```bibtex
 @inproceedings{bhatia2021exgan,
